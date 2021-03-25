@@ -7,17 +7,30 @@ using System.Threading.Tasks;
 
 namespace TablesReach.API
 {
-public class Config
-{
-    public static IEnumerable<ApiScope> GetAllApiResources()
+    public class Config
     {
-        return new List<ApiScope>
+        public static IEnumerable<ApiScope> GetAllApiResources()
+        {
+            return new List<ApiScope>
         {
             new ApiScope("TablesReachApi", "Api for solution")
         };
-    }
+        }
+        public static IEnumerable<ApiScope> ApiScopes =>
+           new ApiScope[]
+           {
+              new ApiScope("TablesReachApi")
+           };
 
-    public static IEnumerable<Client> Clients = new List<Client>
+        public static IEnumerable<ApiResource> Apis =>
+           new ApiResource[]
+           {
+      new ApiResource("IdentityServerConstants.LocalApi.ScopeName")
+    {
+       Scopes = new []{ "TablesReachApi" }
+    },
+           };
+        public static IEnumerable<Client> Clients = new List<Client>
     {
         new Client
         {
@@ -31,17 +44,13 @@ public class Config
         }
     };
 
-    public static IEnumerable<IdentityResource> IdentityResources = new List<IdentityResource>
+        public static IEnumerable<IdentityResource> IdentityResources = new List<IdentityResource>
     {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile(),
         new IdentityResources.Email(),
     };
 
-    public static IEnumerable<ApiResource> Apis = new List<ApiResource>
-    {
-        // local API
-        new ApiResource(IdentityServerConstants.LocalApi.ScopeName),
-    };
-}
+
+    }
 }
