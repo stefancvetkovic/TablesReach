@@ -2,46 +2,46 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using TablesReach.Models;
-using Microsoft.EntityFrameworkCore;
+using TablesReach.API;
 
 namespace TablesReach
 {
-    public class Startup
+public class Startup
+{
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddIdentityServer()
+            .AddDeveloperSigningCredential()
+            .AddInMemoryClients(Config.Clients)
+            .AddInMemoryApiResources(Config.Apis)
+            .AddTestUsers(TestUsers.Users);
+
+        services.AddLocalApiAuthentication();
+        services.AddSwaggerGen();
+        services.AddControllers();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        });
+        app.UseRouting();
+        app.UseEndpoints(endpoints =>
         {
-            services.AddDbContext<DataContext>(opts => opts.UseInMemoryDatabase("UNWDb"));
-            services.AddControllers();
-        }
+            endpoints.MapControllers();
+        });
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
+        app.UseIdentityServer();
+    }
     }
 }
